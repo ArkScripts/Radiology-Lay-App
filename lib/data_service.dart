@@ -45,6 +45,9 @@ const String _remoteJsonUrl = 'https://simplemed.co.uk/api/radiology_data.json';
 /// Key used to store cached JSON in SharedPreferences.
 const String _cacheKey = 'cached_radiology_json';
 
+/// Key used to store favourite scan IDs in SharedPreferences.
+const String _favouritesKey = 'favourite_scan_ids';
+
 // ============================================================================
 // DATA SERVICE - Fetching and Caching Logic
 // ============================================================================
@@ -223,6 +226,83 @@ class DataService {
 }
 
 // ============================================================================
+// FAVOURITES SERVICE - Local Storage for Saved Scans
+// ============================================================================
+
+/// Service for managing favourite scans.
+///
+/// Stores scan IDs in SharedPreferences as a JSON-encoded list.
+/// This allows patients to bookmark scans they're scheduled for.
+///
+/// JAVA COMPARISON:
+/// Similar to saving a Set<String> to SharedPreferences in Android:
+/// ```java
+/// prefs.edit().putStringSet("favourites", favouriteIds).apply();
+/// ```
+class FavouritesService {
+  static final FavouritesService _instance = FavouritesService._internal();
+  factory FavouritesService() => _instance;
+  FavouritesService._internal();
+
+  /// Loads the set of favourite scan IDs from local storage.
+  Future<Set<String>> loadFavourites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_favouritesKey);
+
+    if (jsonString == null || jsonString.isEmpty) {
+      return <String>{};
+    }
+
+    try {
+      // Decode JSON array to List, then convert to Set
+      final List<dynamic> list = jsonDecode(jsonString);
+      return list.map((e) => e.toString()).toSet();
+    } catch (e) {
+      debugPrint('[FavouritesService] Error loading favourites: $e');
+      return <String>{};
+    }
+  }
+
+  /// Saves the set of favourite scan IDs to local storage.
+  Future<void> saveFavourites(Set<String> favourites) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(favourites.toList());
+    await prefs.setString(_favouritesKey, jsonString);
+  }
+
+  /// Adds a scan ID to favourites.
+  Future<Set<String>> addFavourite(String scanId) async {
+    final favourites = await loadFavourites();
+    favourites.add(scanId);
+    await saveFavourites(favourites);
+    return favourites;
+  }
+
+  /// Removes a scan ID from favourites.
+  Future<Set<String>> removeFavourite(String scanId) async {
+    final favourites = await loadFavourites();
+    favourites.remove(scanId);
+    await saveFavourites(favourites);
+    return favourites;
+  }
+
+  /// Toggles a scan's favourite status.
+  Future<bool> toggleFavourite(String scanId) async {
+    final favourites = await loadFavourites();
+    final isFavourite = favourites.contains(scanId);
+
+    if (isFavourite) {
+      favourites.remove(scanId);
+    } else {
+      favourites.add(scanId);
+    }
+
+    await saveFavourites(favourites);
+    return !isFavourite; // Return new state
+  }
+}
+
+// ============================================================================
 // DATA PROVIDER - State Management with ChangeNotifier
 // ============================================================================
 
@@ -246,10 +326,12 @@ class DataService {
 /// ```
 class DataProvider extends ChangeNotifier {
   final DataService _dataService = DataService();
+  final FavouritesService _favouritesService = FavouritesService();
 
   AppData? _appData;
   bool _isLoading = true;
   String? _errorMessage;
+  Set<String> _favouriteIds = {};
 
   // Getters - similar to Java getter methods
   // The `=>` syntax is shorthand for `{ return _appData; }`
@@ -258,6 +340,7 @@ class DataProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get hasError => _errorMessage != null;
   bool get hasData => _appData != null && _appData!.sections.isNotEmpty;
+  Set<String> get favouriteIds => _favouriteIds;
 
   /// Get all scans across all sections as a flat list.
   /// Useful for search functionality.
@@ -266,6 +349,28 @@ class DataProvider extends ChangeNotifier {
     // `expand` flattens nested lists - like Java's `flatMap`
     return _appData!.sections.expand((section) => section.scans).toList();
   }
+
+  /// Get favourite scans with their category info.
+  List<SearchResult> get favouriteScans {
+    if (_appData == null) return [];
+
+    final results = <SearchResult>[];
+    for (final section in _appData!.sections) {
+      for (final scan in section.scans) {
+        if (_favouriteIds.contains(scan.id)) {
+          results.add(SearchResult(
+            scan: scan,
+            categoryName: section.categoryName,
+            categoryColor: section.colorHex,
+          ));
+        }
+      }
+    }
+    return results;
+  }
+
+  /// Check if a scan is favourited.
+  bool isFavourite(String scanId) => _favouriteIds.contains(scanId);
 
   /// Loads data and notifies listeners when complete.
   ///
@@ -276,7 +381,14 @@ class DataProvider extends ChangeNotifier {
     notifyListeners(); // Notify UI that loading started
 
     try {
-      _appData = await _dataService.loadData();
+      // Load data and favourites in parallel
+      final results = await Future.wait([
+        _dataService.loadData(),
+        _favouritesService.loadFavourites(),
+      ]);
+
+      _appData = results[0] as AppData;
+      _favouriteIds = results[1] as Set<String>;
       _errorMessage = null;
     } catch (e) {
       _errorMessage = 'Failed to load data: $e';
@@ -291,6 +403,19 @@ class DataProvider extends ChangeNotifier {
   /// Refreshes data from network (for pull-to-refresh).
   Future<void> refreshData() async {
     await loadData();
+  }
+
+  /// Toggles favourite status for a scan.
+  Future<void> toggleFavourite(String scanId) async {
+    final newState = await _favouritesService.toggleFavourite(scanId);
+
+    if (newState) {
+      _favouriteIds.add(scanId);
+    } else {
+      _favouriteIds.remove(scanId);
+    }
+
+    notifyListeners();
   }
 
   /// Searches scans by title or summary (case-insensitive).

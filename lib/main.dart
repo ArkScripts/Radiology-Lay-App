@@ -28,6 +28,11 @@
 /// 5. CONST CONSTRUCTORS:
 ///    `const` widgets are compile-time constants - Flutter reuses them for
 ///    performance. Use when widget and all children are immutable.
+///
+/// 6. ACCESSIBILITY (a11y):
+///    Flutter provides built-in accessibility through `Semantics` widgets.
+///    These provide labels for screen readers (TalkBack on Android, VoiceOver on iOS).
+///    Similar to Android's `contentDescription` attribute.
 
 library;
 
@@ -35,6 +40,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:share_plus/share_plus.dart';
 import 'models.dart';
 import 'data_service.dart';
 
@@ -102,6 +108,24 @@ class SimpleMedApp extends StatelessWidget {
         title: 'SimpleMed Radiology',
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
+        // Enable dynamic text scaling for accessibility
+        // Users can set larger text in system settings
+        builder: (context, child) {
+          // Get the system text scale factor
+          final mediaQuery = MediaQuery.of(context);
+
+          // Cap the text scale to prevent layout issues with very large text
+          // but still allow significant scaling for accessibility
+          final cappedTextScaler = mediaQuery.textScaler.clamp(
+            minScaleFactor: 0.8,
+            maxScaleFactor: 1.5,
+          );
+
+          return MediaQuery(
+            data: mediaQuery.copyWith(textScaler: cappedTextScaler),
+            child: child!,
+          );
+        },
         home: const HomeScreen(),
       ),
     );
@@ -141,16 +165,13 @@ class SimpleMedApp extends StatelessWidget {
 }
 
 // ============================================================================
-// HOME SCREEN
+// HOME SCREEN WITH BOTTOM NAVIGATION
 // ============================================================================
 
-/// Main home screen displaying search bar and scan list grouped by category.
-///
-/// `StatefulWidget` because we need to track search query state.
+/// Main home screen with bottom navigation for Scans, Favourites, and FAQ.
 ///
 /// JAVA COMPARISON:
-/// StatefulWidget is like an Android Activity or Fragment with a ViewModel.
-/// The State class holds the mutable data (like ViewModel fields).
+/// Similar to an Activity with BottomNavigationView and Fragments.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -158,20 +179,66 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-/// The state class for HomeScreen.
-/// Prefix with underscore to make it private to this file.
 class _HomeScreenState extends State<HomeScreen> {
-  /// TextEditingController manages the text field's content.
-  /// Similar to Android's EditText.getText()/setText().
-  final TextEditingController _searchController = TextEditingController();
+  int _selectedIndex = 0;
 
-  /// Current search query (empty string means show all).
+  final List<Widget> _screens = const [
+    ScansScreen(),
+    FavouritesScreen(),
+    FAQScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.medical_services_outlined),
+            selectedIcon: Icon(Icons.medical_services),
+            label: 'Scans',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite_outline),
+            selectedIcon: Icon(Icons.favorite),
+            label: 'Saved',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.help_outline),
+            selectedIcon: Icon(Icons.help),
+            label: 'FAQ',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// SCANS SCREEN (Main List)
+// ============================================================================
+
+/// Screen displaying search bar and scan list grouped by category.
+class ScansScreen extends StatefulWidget {
+  const ScansScreen({super.key});
+
+  @override
+  State<ScansScreen> createState() => _ScansScreenState();
+}
+
+class _ScansScreenState extends State<ScansScreen> {
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
   void dispose() {
-    // Always dispose controllers to prevent memory leaks
-    // Similar to nullifying references in Java or using WeakReferences
     _searchController.dispose();
     super.dispose();
   }
@@ -183,13 +250,6 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('SimpleMed Radiology'),
         centerTitle: true,
       ),
-      // Consumer listens to DataProvider changes and rebuilds when notified.
-      //
-      // JAVA COMPARISON:
-      // Similar to observing LiveData:
-      // ```java
-      // viewModel.getData().observe(this, data -> updateUI(data));
-      // ```
       body: Consumer<DataProvider>(
         builder: (context, dataProvider, child) {
           if (dataProvider.isLoading) {
@@ -207,30 +267,30 @@ class _HomeScreenState extends State<HomeScreen> {
             return const _EmptyWidget();
           }
 
-          // Show either search results or full category list
           return _buildContent(dataProvider);
         },
       ),
     );
   }
 
-  /// Builds the main content with search bar and scan list.
   Widget _buildContent(DataProvider dataProvider) {
     return Column(
       children: [
-        // Search bar
-        _SearchBar(
-          controller: _searchController,
-          onChanged: (query) {
-            // setState triggers a rebuild with new _searchQuery value
-            // Similar to calling LiveData.setValue() in Android ViewModel
-            setState(() {
-              _searchQuery = query;
-            });
-          },
+        // Search bar with accessibility label
+        Semantics(
+          label: 'Search for scans',
+          hint: 'Type to filter the scan list',
+          child: _SearchBar(
+            controller: _searchController,
+            onChanged: (query) {
+              setState(() {
+                _searchQuery = query;
+              });
+            },
+          ),
         ),
 
-        // Scan list (expands to fill remaining space)
+        // Scan list
         Expanded(
           child: _searchQuery.isEmpty
               ? _buildCategoryList(dataProvider)
@@ -240,17 +300,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Builds the grouped list of scans by category.
   Widget _buildCategoryList(DataProvider dataProvider) {
     final sections = dataProvider.appData!.sections;
 
-    // RefreshIndicator enables pull-to-refresh gesture
     return RefreshIndicator(
       onRefresh: () => dataProvider.refreshData(),
       color: NHSColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.only(bottom: 16),
-        // Total items = sections + scans in each section + header for each section
         itemCount: sections.length,
         itemBuilder: (context, sectionIndex) {
           final section = sections[sectionIndex];
@@ -260,7 +317,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Builds search results list.
   Widget _buildSearchResults(DataProvider dataProvider) {
     final results = dataProvider.searchScans(_searchQuery);
 
@@ -307,6 +363,189 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 // ============================================================================
+// FAVOURITES SCREEN
+// ============================================================================
+
+/// Screen displaying user's saved/bookmarked scans.
+class FavouritesScreen extends StatelessWidget {
+  const FavouritesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Saved Scans'),
+        centerTitle: true,
+      ),
+      body: Consumer<DataProvider>(
+        builder: (context, dataProvider, child) {
+          if (dataProvider.isLoading) {
+            return const _LoadingWidget();
+          }
+
+          final favourites = dataProvider.favouriteScans;
+
+          if (favourites.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.favorite_outline,
+                      size: 80,
+                      color: NHSColors.darkGrey.withValues(alpha: 0.3),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'No saved scans yet',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: NHSColors.darkGrey.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Tap the heart icon on any scan to save it here for quick access.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: NHSColors.darkGrey.withValues(alpha: 0.6),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: favourites.length,
+            itemBuilder: (context, index) {
+              final result = favourites[index];
+              return _ScanCard(
+                scan: result.scan,
+                categoryColor: _parseColor(result.categoryColor),
+                categoryName: result.categoryName,
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// FAQ SCREEN
+// ============================================================================
+
+/// Frequently Asked Questions screen for common patient queries.
+class FAQScreen extends StatelessWidget {
+  const FAQScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('FAQ'),
+        centerTitle: true,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: const [
+          _FAQItem(
+            question: 'Can I eat before my scan?',
+            answer:
+                'It depends on the scan type. CT and ultrasound scans often require fasting (no food for 4-6 hours). MRI and X-ray scans usually have no fasting requirements. Always check the specific preparation instructions for your scan.',
+          ),
+          _FAQItem(
+            question: 'What if I\'m claustrophobic?',
+            answer:
+                'Let your hospital know when booking. For MRI scans, you may be offered a sedative or referred to a hospital with an open MRI scanner. CT scanners are much more open and usually cause less anxiety. Staff are trained to help you feel comfortable.',
+          ),
+          _FAQItem(
+            question: 'Are scans safe during pregnancy?',
+            answer:
+                'Ultrasound and MRI are generally safe during pregnancy. CT and X-ray scans use radiation and are usually avoided unless absolutely necessary. Always inform staff if you are or might be pregnant.',
+          ),
+          _FAQItem(
+            question: 'What is contrast dye?',
+            answer:
+                'Contrast is a special liquid given by injection or drink that helps certain organs and blood vessels show up more clearly on scans. It\'s very safe but can cause allergic reactions in rare cases. Tell staff if you\'ve had a reaction before.',
+          ),
+          _FAQItem(
+            question: 'How long do results take?',
+            answer:
+                'Results are usually reviewed by a radiologist within 24-48 hours. Your referring doctor will discuss the results with you, typically within 1-2 weeks. Urgent findings are communicated immediately.',
+          ),
+          _FAQItem(
+            question: 'Can I bring someone with me?',
+            answer:
+                'Yes, a friend or family member can usually accompany you to the waiting area. They may not be allowed in the scan room for safety reasons (especially MRI), but staff will keep them informed.',
+          ),
+          _FAQItem(
+            question: 'What should I wear?',
+            answer:
+                'Wear comfortable, loose clothing without metal (zips, buttons, underwire). You may be asked to change into a hospital gown. Remove jewellery, watches, and hearing aids before entering the scan room.',
+          ),
+          _FAQItem(
+            question: 'Can I take my medication?',
+            answer:
+                'In most cases, yes. Continue taking your regular medication unless specifically told otherwise. If you\'re diabetic and need to fast, ask for an early appointment to minimise disruption to your medication schedule.',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Individual FAQ item with expandable answer.
+///
+/// Uses `ExpansionTile` for collapsible content.
+/// ACCESSIBILITY: Screen readers will announce the question and expansion state.
+class _FAQItem extends StatelessWidget {
+  final String question;
+  final String answer;
+
+  const _FAQItem({
+    required this.question,
+    required this.answer,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ExpansionTile(
+        title: Text(
+          question,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            answer,
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.5,
+              color: NHSColors.darkGrey.withValues(alpha: 0.85),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================================
 // REUSABLE WIDGETS
 // ============================================================================
 
@@ -338,6 +577,7 @@ class _SearchBar extends StatelessWidget {
                     controller.clear();
                     onChanged('');
                   },
+                  tooltip: 'Clear search',
                 )
               : null,
           filled: true,
@@ -369,23 +609,26 @@ class _CategorySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Category header
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          margin: const EdgeInsets.only(top: 8),
-          decoration: BoxDecoration(
-            color: categoryColor.withValues(alpha: 0.1),
-            border: Border(
-              left: BorderSide(color: categoryColor, width: 4),
+        // Category header with semantic label
+        Semantics(
+          header: true,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            margin: const EdgeInsets.only(top: 8),
+            decoration: BoxDecoration(
+              color: categoryColor.withValues(alpha: 0.1),
+              border: Border(
+                left: BorderSide(color: categoryColor, width: 4),
+              ),
             ),
-          ),
-          child: Text(
-            section.categoryName,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: categoryColor,
+            child: Text(
+              section.categoryName,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: categoryColor,
+              ),
             ),
           ),
         ),
@@ -408,8 +651,7 @@ class _CategorySection extends StatelessWidget {
   }
 }
 
-/// Card widget displaying a scan summary.
-/// Tapping navigates to the detail screen.
+/// Card widget displaying a scan summary with favourite button.
 class _ScanCard extends StatelessWidget {
   final Scan scan;
   final Color categoryColor;
@@ -423,59 +665,77 @@ class _ScanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        // onTap callback - similar to Android's setOnClickListener
-        onTap: () => _navigateToDetail(context),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Icon/thumbnail
-              _buildIcon(),
-              const SizedBox(width: 16),
+    return Consumer<DataProvider>(
+      builder: (context, dataProvider, child) {
+        final isFavourite = dataProvider.isFavourite(scan.id);
 
-              // Title and summary
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      scan.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      scan.shortSummary,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: NHSColors.darkGrey.withValues(alpha: 0.8),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => _navigateToDetail(context),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  // Icon/thumbnail
+                  _buildIcon(),
+                  const SizedBox(width: 16),
 
-              // Arrow indicator
-              Icon(
-                Icons.chevron_right,
-                color: NHSColors.darkGrey.withValues(alpha: 0.5),
+                  // Title and summary
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          scan.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          scan.shortSummary,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: NHSColors.darkGrey.withValues(alpha: 0.8),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Favourite button
+                  Semantics(
+                    label: isFavourite ? 'Remove from saved' : 'Save scan',
+                    button: true,
+                    child: IconButton(
+                      icon: Icon(
+                        isFavourite ? Icons.favorite : Icons.favorite_outline,
+                        color: isFavourite ? NHSColors.red : NHSColors.darkGrey,
+                      ),
+                      onPressed: () => dataProvider.toggleFavourite(scan.id),
+                      tooltip: isFavourite ? 'Remove from saved' : 'Save',
+                    ),
+                  ),
+
+                  // Arrow indicator
+                  Icon(
+                    Icons.chevron_right,
+                    color: NHSColors.darkGrey.withValues(alpha: 0.5),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  /// Builds the scan icon with caching.
   Widget _buildIcon() {
     return Container(
       width: 60,
@@ -487,8 +747,6 @@ class _ScanCard extends StatelessWidget {
       child: scan.media.iconUrl.isNotEmpty
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              // CachedNetworkImage caches images to disk for offline use.
-              // Similar to Android's Glide or Picasso libraries.
               child: CachedNetworkImage(
                 imageUrl: scan.media.iconUrl,
                 fit: BoxFit.cover,
@@ -514,17 +772,6 @@ class _ScanCard extends StatelessWidget {
     );
   }
 
-  /// Navigates to the detail screen.
-  ///
-  /// JAVA COMPARISON:
-  /// Similar to Android's:
-  /// ```java
-  /// Intent intent = new Intent(this, DetailActivity.class);
-  /// intent.putExtra("scan", scan);
-  /// startActivity(intent);
-  /// ```
-  ///
-  /// In Flutter, we push a new route onto the Navigator stack.
   void _navigateToDetail(BuildContext context) {
     Navigator.push(
       context,
@@ -625,7 +872,7 @@ class _EmptyWidget extends StatelessWidget {
 // DETAIL SCREEN
 // ============================================================================
 
-/// Detail screen showing full scan information.
+/// Detail screen showing full scan information with share functionality.
 class DetailScreen extends StatelessWidget {
   final Scan scan;
   final Color categoryColor;
@@ -642,20 +889,49 @@ class DetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
-        // CustomScrollView enables sliver-based scrolling with collapsing app bar
         slivers: [
-          // Collapsing app bar with hero image
           _buildSliverAppBar(context),
-
-          // Content
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Category tag
-                  _buildCategoryTag(),
+                  // Category tag and favourite button row
+                  Row(
+                    children: [
+                      _buildCategoryTag(),
+                      const Spacer(),
+                      // Favourite button
+                      Consumer<DataProvider>(
+                        builder: (context, dataProvider, _) {
+                          final isFavourite = dataProvider.isFavourite(scan.id);
+                          return IconButton(
+                            icon: Icon(
+                              isFavourite
+                                  ? Icons.favorite
+                                  : Icons.favorite_outline,
+                              color: isFavourite
+                                  ? NHSColors.red
+                                  : NHSColors.darkGrey,
+                              size: 28,
+                            ),
+                            onPressed: () =>
+                                dataProvider.toggleFavourite(scan.id),
+                            tooltip: isFavourite
+                                ? 'Remove from saved'
+                                : 'Save scan',
+                          );
+                        },
+                      ),
+                      // Share button
+                      IconButton(
+                        icon: const Icon(Icons.share, size: 26),
+                        onPressed: () => _shareScan(context),
+                        tooltip: 'Share scan information',
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
 
                   // Title
@@ -756,9 +1032,7 @@ class DetailScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the collapsing app bar with hero image.
   Widget _buildSliverAppBar(BuildContext context) {
-    // Calculate height based on aspect ratio
     final screenWidth = MediaQuery.of(context).size.width;
     final imageHeight = screenWidth / scan.media.heroAspectRatio;
 
@@ -798,7 +1072,6 @@ class DetailScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the category tag chip.
   Widget _buildCategoryTag() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -817,6 +1090,47 @@ class DetailScreen extends StatelessWidget {
       ),
     );
   }
+
+  /// Shares scan information using the native share sheet.
+  ///
+  /// JAVA COMPARISON:
+  /// Similar to Android's:
+  /// ```java
+  /// Intent shareIntent = new Intent(Intent.ACTION_SEND);
+  /// shareIntent.setType("text/plain");
+  /// shareIntent.putExtra(Intent.EXTRA_TEXT, text);
+  /// startActivity(Intent.createChooser(shareIntent, "Share via"));
+  /// ```
+  void _shareScan(BuildContext context) {
+    final shareText = '''
+${scan.title}
+
+${scan.shortSummary}
+
+PREPARATION:
+- Fasting: ${scan.preparation.requiresFasting ? '${scan.preparation.fastingHours} hours before' : 'Not required'}
+- Bladder: ${scan.preparation.bladder}
+${scan.preparation.instructions.isNotEmpty ? '- ${scan.preparation.instructions}' : ''}
+
+WHAT TO EXPECT:
+- Duration: ${scan.logistics.durationMinutes} minutes
+- Noise Level: ${scan.logistics.noiseLevel}
+- Claustrophobia Risk: ${scan.logistics.claustrophobiaRisk}
+
+SAFETY:
+- Radiation Level: ${scan.safety.radiationLevel}
+${scan.safety.radiationNote.isNotEmpty ? '- ${scan.safety.radiationNote}' : ''}
+- Contrast Dye: ${scan.safety.contrastRisk ? 'May be required' : 'Not required'}
+- Pregnancy Safe: ${scan.safety.pregnancySafe ? 'Yes' : 'Consult your doctor'}
+
+Shared from SimpleMed Radiology App
+''';
+
+    Share.share(
+      shareText,
+      subject: 'Scan Information: ${scan.title}',
+    );
+  }
 }
 
 // ============================================================================
@@ -824,11 +1138,6 @@ class DetailScreen extends StatelessWidget {
 // ============================================================================
 
 /// Traffic light safety indicator widget.
-///
-/// Displays safety information with color-coded indicators:
-/// - Green: Low risk/safe
-/// - Amber: Moderate risk/caution
-/// - Red: High risk/warning
 class SafetyInfoBox extends StatelessWidget {
   final Safety safety;
 
@@ -838,91 +1147,93 @@ class SafetyInfoBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final radiationColor = _getRadiationColor(safety.radiationLevel);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: radiationColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: radiationColor.withValues(alpha: 0.3),
-          width: 2,
+    return Semantics(
+      label:
+          'Safety information. Radiation level: ${safety.radiationLevel}. ${safety.radiationNote}',
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: radiationColor.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: radiationColor.withValues(alpha: 0.3),
+            width: 2,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with traffic light
-          Row(
-            children: [
-              _TrafficLight(activeLevel: safety.radiationLevel),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Safety Information',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _TrafficLight(activeLevel: safety.radiationLevel),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Safety Information',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Radiation Level: ${safety.radiationLevel}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: radiationColor,
+                      const SizedBox(height: 4),
+                      Text(
+                        'Radiation Level: ${safety.radiationLevel}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: radiationColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            if (safety.radiationNote.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                safety.radiationNote,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: NHSColors.darkGrey.withValues(alpha: 0.8),
                 ),
               ),
             ],
-          ),
 
-          if (safety.radiationNote.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              safety.radiationNote,
-              style: TextStyle(
-                fontSize: 14,
-                color: NHSColors.darkGrey.withValues(alpha: 0.8),
-              ),
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+
+            // Warning indicators
+            Row(
+              children: [
+                Expanded(
+                  child: _SafetyIndicator(
+                    icon: Icons.science_outlined,
+                    label: 'Contrast Dye',
+                    isRisk: safety.contrastRisk,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _SafetyIndicator(
+                    icon: Icons.pregnant_woman,
+                    label: 'Pregnancy',
+                    isRisk: !safety.pregnancySafe,
+                  ),
+                ),
+              ],
             ),
           ],
-
-          const SizedBox(height: 16),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
-
-          // Warning indicators
-          Row(
-            children: [
-              Expanded(
-                child: _SafetyIndicator(
-                  icon: Icons.science_outlined,
-                  label: 'Contrast Dye',
-                  isRisk: safety.contrastRisk,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _SafetyIndicator(
-                  icon: Icons.pregnant_woman,
-                  label: 'Pregnancy',
-                  isRisk: !safety.pregnancySafe,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  /// Returns color based on radiation level.
   Color _getRadiationColor(String level) {
     switch (level.toLowerCase()) {
       case 'green':
@@ -986,7 +1297,7 @@ class _TrafficLight extends StatelessWidget {
   }
 }
 
-/// Individual safety indicator (e.g., contrast risk, pregnancy).
+/// Individual safety indicator.
 class _SafetyIndicator extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1003,30 +1314,34 @@ class _SafetyIndicator extends StatelessWidget {
     final color = isRisk ? NHSColors.red : NHSColors.green;
     final statusText = isRisk ? 'Caution' : 'Safe';
 
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-              ),
-              Text(
-                statusText,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: color,
+    return Semantics(
+      label: '$label: $statusText',
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w500),
                 ),
-              ),
-            ],
+                Text(
+                  statusText,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1035,7 +1350,7 @@ class _SafetyIndicator extends StatelessWidget {
 // INFO BLOCKS
 // ============================================================================
 
-/// Reusable info block container with title and icon.
+/// Reusable info block container.
 class _InfoBlock extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -1096,29 +1411,33 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: NHSColors.darkGrey.withValues(alpha: 0.6)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                color: NHSColors.darkGrey.withValues(alpha: 0.8),
+    return Semantics(
+      label: '$label: $value',
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            Icon(icon,
+                size: 20, color: NHSColors.darkGrey.withValues(alpha: 0.6)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: NHSColors.darkGrey.withValues(alpha: 0.8),
+                ),
               ),
             ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1129,17 +1448,9 @@ class _InfoRow extends StatelessWidget {
 // ============================================================================
 
 /// Parses hex color string to Color object.
-///
-/// JAVA COMPARISON:
-/// Similar to Android's `Color.parseColor("#RRGGBB")`.
-///
-/// Dart doesn't have a built-in hex parser, so we implement it manually.
 Color _parseColor(String hexString) {
-  // Remove # prefix if present
   final hex = hexString.replaceFirst('#', '');
 
-  // Parse as integer with radix 16 (hexadecimal)
-  // `0xFF` prefix adds full opacity (alpha = 255)
   try {
     if (hex.length == 6) {
       return Color(int.parse('FF$hex', radix: 16));
