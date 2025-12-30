@@ -1,4 +1,4 @@
-# SimpleRad - Easy Scan Info
+# SimpleRad - Your Scan Explained
 
 A cross-platform mobile app (iOS/Android) built with Flutter to explain basic radiology scans in simple, lay terms for patients.
 

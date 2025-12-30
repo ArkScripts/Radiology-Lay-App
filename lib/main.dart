@@ -1124,7 +1124,7 @@ ${scan.safety.radiationNote.isNotEmpty ? '- ${scan.safety.radiationNote}' : ''}
 - Contrast Dye: ${scan.safety.contrastRisk ? 'May be required' : 'Not required'}
 - Pregnancy Safe: ${scan.safety.pregnancySafe ? 'Yes' : 'Consult your doctor'}
 
-Shared from SimpleRad - Easy Scan Info
+Shared from SimpleRad - Your Scan Explained
 ''';
 
     Share.share(
