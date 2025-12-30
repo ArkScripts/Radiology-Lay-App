@@ -1,5 +1,5 @@
-name: simplemed_radiology
-description: SimpleMed Radiology Info - NHS patient education app for radiology scans
+name: simplerad
+description: SimpleRad - Easy Scan Info - NHS patient education app for radiology scans
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -59,7 +59,7 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/app_icon.png"
   # Adaptive icon for Android 8.0+ (API 26+)
-  adaptive_icon_background: "#005EB8"
+  adaptive_icon_background: "#03CCBD"
   adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
   # Remove alpha channel for iOS (required by App Store)
   remove_alpha_ios: true
@@ -72,12 +72,12 @@ flutter_launcher_icons:
 # This creates native splash screens that display instantly on app launch,
 # before Flutter engine initializes (faster than Flutter-based splash).
 flutter_native_splash:
-  color: "#005EB8"
+  color: "#03CCBD"
   image: "assets/icon/splash_logo.png"
   # Android 12+ splash screen
   android_12:
-    color: "#005EB8"
-    icon_background_color: "#005EB8"
+    color: "#03CCBD"
+    icon_background_color: "#03CCBD"
     image: "assets/icon/splash_logo.png"
   # iOS configuration
   ios: true

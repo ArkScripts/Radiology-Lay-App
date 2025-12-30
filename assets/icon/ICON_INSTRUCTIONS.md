@@ -6,7 +6,7 @@ Place the following PNG files in this directory:
 
 ### 1. `app_icon.png` (1024x1024 pixels)
 - Main app icon shown on home screen
-- Should have NHS Blue (#005EB8) background
+- Should have SimpleMed Teal (#03CCBD) background
 - White medical/radiology symbol (e.g., simplified CT scanner or medical cross)
 - Square with rounded corners handled by the OS
 
@@ -18,11 +18,18 @@ Place the following PNG files in this directory:
 ### 3. `splash_logo.png` (512x512 pixels)
 - Logo shown on splash screen during app launch
 - White icon on transparent background
-- Will be displayed on NHS Blue (#005EB8) background
+- Will be displayed on SimpleMed Teal (#03CCBD) background
+
+## SimpleMed Brand Colors
+
+- **Primary Teal**: #03CCBD
+- **Dark Teal**: #0B858A
+- **Green Accent**: #03E16D
+- **White**: #FFFFFF
 
 ## Suggested Design
 
-Simple medical cross or stylized "SM" monogram in white:
+Simple medical cross or stylized "SR" monogram in white:
 - Clean, modern, accessible design
 - High contrast for visibility
 - Works at small sizes (app icon on phone)

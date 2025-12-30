@@ -1,10 +1,10 @@
-# SimpleMed Radiology Info
+# SimpleRad - Easy Scan Info
 
-A cross-platform mobile app (iOS/Android) built with Flutter to explain basic radiology scans in simple, lay terms for NHS patients.
+A cross-platform mobile app (iOS/Android) built with Flutter to explain basic radiology scans in simple, lay terms for patients.
 
 ## Purpose
 
-This app helps NHS patients understand common radiology scans (CT, MRI, Ultrasound, X-Ray) by providing:
+This app helps patients understand common radiology scans (CT, MRI, Ultrasound, X-Ray) by providing:
 - Plain English explanations
 - Preparation instructions
 - Safety information with traffic light indicators
@@ -84,6 +84,7 @@ flutter build ios --release
 | `cached_network_image` | Image caching | Glide/Picasso |
 | `provider` | State management | ViewModel + LiveData |
 | `google_fonts` | Typography | Fonts in res/ |
+| `share_plus` | Share functionality | Intent.ACTION_SEND |
 
 ## For Java Developers
 
@@ -97,13 +98,22 @@ The codebase includes detailed comments explaining Dart/Flutter concepts in term
 - `final` → Same as Java's final
 - `required` → Non-null parameters
 
-## NHS Branding
+## SimpleMed Branding
 
-Uses official NHS colour palette:
-- Primary: `#005EB8` (NHS Blue)
-- Secondary: `#003087` (NHS Dark Blue)
+Uses SimpleMed colour palette:
+- Primary: `#03CCBD` (SimpleMed Teal)
+- Secondary: `#0B858A` (Dark Teal)
+- Accent: `#03E16D` (Green)
 - Clean white backgrounds
 - Lato font family
+
+## Features
+
+- **Search** - Filter scans in real-time
+- **Favourites** - Save scans for quick access
+- **Share** - Share scan info with family
+- **FAQ** - Common patient questions answered
+- **Accessibility** - Screen reader support, dynamic text scaling
 
 ## JSON Data Format
 
@@ -113,7 +123,7 @@ Uses official NHS colour palette:
   "sections": [
     {
       "category_name": "CT Scans",
-      "category_color_hex": "#005EB8",
+      "category_color_hex": "#03CCBD",
       "scans": [
         {
           "id": "ct_abdo",

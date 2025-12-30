@@ -45,20 +45,21 @@ import 'models.dart';
 import 'data_service.dart';
 
 // ============================================================================
-// NHS BRAND COLORS
+// SIMPLEMED BRAND COLORS
 // ============================================================================
 
-/// NHS Brand colors as static constants.
+/// SimpleMed brand colors as static constants.
 /// In Java, these would be `public static final` fields.
-class NHSColors {
+class AppColors {
   // Private constructor prevents instantiation (utility class pattern)
-  NHSColors._();
+  AppColors._();
 
-  static const Color primary = Color(0xFF005EB8); // NHS Blue
-  static const Color secondary = Color(0xFF003087); // NHS Dark Blue
+  static const Color primary = Color(0xFF03CCBD); // SimpleMed Teal
+  static const Color secondary = Color(0xFF0B858A); // Dark Teal
+  static const Color accent = Color(0xFF03E16D); // Green accent
   static const Color white = Color(0xFFFFFFFF);
-  static const Color lightGrey = Color(0xFFF0F4F5);
-  static const Color darkGrey = Color(0xFF425563);
+  static const Color lightGrey = Color(0xFFF9FAFC);
+  static const Color darkGrey = Color(0xFF696969);
 
   // Traffic light colors for safety indicators
   static const Color green = Color(0xFF00703C);
@@ -105,7 +106,7 @@ class SimpleMedApp extends StatelessWidget {
       // The `..` cascade operator calls loadData() and returns the provider
       create: (context) => DataProvider()..loadData(),
       child: MaterialApp(
-        title: 'SimpleMed Radiology',
+        title: 'SimpleRad',
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
         // Enable dynamic text scaling for accessibility
@@ -137,21 +138,21 @@ class SimpleMedApp extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: NHSColors.primary,
-        primary: NHSColors.primary,
-        secondary: NHSColors.secondary,
+        seedColor: AppColors.primary,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
       ),
       // Google Fonts provides the Lato font family
       textTheme: GoogleFonts.latoTextTheme(),
-      scaffoldBackgroundColor: NHSColors.white,
+      scaffoldBackgroundColor: AppColors.white,
       appBarTheme: AppBarTheme(
-        backgroundColor: NHSColors.primary,
-        foregroundColor: NHSColors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
         elevation: 0,
         titleTextStyle: GoogleFonts.lato(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: NHSColors.white,
+          color: AppColors.white,
         ),
       ),
       cardTheme: CardTheme(
@@ -247,7 +248,7 @@ class _ScansScreenState extends State<ScansScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SimpleMed Radiology'),
+        title: const Text('SimpleRad'),
         centerTitle: true,
       ),
       body: Consumer<DataProvider>(
@@ -305,7 +306,7 @@ class _ScansScreenState extends State<ScansScreen> {
 
     return RefreshIndicator(
       onRefresh: () => dataProvider.refreshData(),
-      color: NHSColors.primary,
+      color: AppColors.primary,
       child: ListView.builder(
         padding: const EdgeInsets.only(bottom: 16),
         itemCount: sections.length,
@@ -330,14 +331,14 @@ class _ScansScreenState extends State<ScansScreen> {
               Icon(
                 Icons.search_off,
                 size: 64,
-                color: NHSColors.darkGrey.withValues(alpha: 0.5),
+                color: AppColors.darkGrey.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
                 'No scans found for "$_searchQuery"',
                 style: TextStyle(
                   fontSize: 16,
-                  color: NHSColors.darkGrey.withValues(alpha: 0.7),
+                  color: AppColors.darkGrey.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -395,7 +396,7 @@ class FavouritesScreen extends StatelessWidget {
                     Icon(
                       Icons.favorite_outline,
                       size: 80,
-                      color: NHSColors.darkGrey.withValues(alpha: 0.3),
+                      color: AppColors.darkGrey.withValues(alpha: 0.3),
                     ),
                     const SizedBox(height: 24),
                     Text(
@@ -403,7 +404,7 @@ class FavouritesScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: NHSColors.darkGrey.withValues(alpha: 0.7),
+                        color: AppColors.darkGrey.withValues(alpha: 0.7),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -411,7 +412,7 @@ class FavouritesScreen extends StatelessWidget {
                       'Tap the heart icon on any scan to save it here for quick access.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: NHSColors.darkGrey.withValues(alpha: 0.6),
+                        color: AppColors.darkGrey.withValues(alpha: 0.6),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -536,7 +537,7 @@ class _FAQItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               height: 1.5,
-              color: NHSColors.darkGrey.withValues(alpha: 0.85),
+              color: AppColors.darkGrey.withValues(alpha: 0.85),
             ),
           ),
         ],
@@ -563,13 +564,13 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: NHSColors.lightGrey,
+      color: AppColors.lightGrey,
       child: TextField(
         controller: controller,
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: 'Search scans...',
-          prefixIcon: const Icon(Icons.search, color: NHSColors.primary),
+          prefixIcon: const Icon(Icons.search, color: AppColors.primary),
           suffixIcon: controller.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear),
@@ -581,7 +582,7 @@ class _SearchBar extends StatelessWidget {
                 )
               : null,
           filled: true,
-          fillColor: NHSColors.white,
+          fillColor: AppColors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -699,7 +700,7 @@ class _ScanCard extends StatelessWidget {
                           scan.shortSummary,
                           style: TextStyle(
                             fontSize: 14,
-                            color: NHSColors.darkGrey.withValues(alpha: 0.8),
+                            color: AppColors.darkGrey.withValues(alpha: 0.8),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -715,7 +716,7 @@ class _ScanCard extends StatelessWidget {
                     child: IconButton(
                       icon: Icon(
                         isFavourite ? Icons.favorite : Icons.favorite_outline,
-                        color: isFavourite ? NHSColors.red : NHSColors.darkGrey,
+                        color: isFavourite ? AppColors.red : AppColors.darkGrey,
                       ),
                       onPressed: () => dataProvider.toggleFavourite(scan.id),
                       tooltip: isFavourite ? 'Remove from saved' : 'Save',
@@ -725,7 +726,7 @@ class _ScanCard extends StatelessWidget {
                   // Arrow indicator
                   Icon(
                     Icons.chevron_right,
-                    color: NHSColors.darkGrey.withValues(alpha: 0.5),
+                    color: AppColors.darkGrey.withValues(alpha: 0.5),
                   ),
                 ],
               ),
@@ -796,7 +797,7 @@ class _LoadingWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: NHSColors.primary),
+          CircularProgressIndicator(color: AppColors.primary),
           SizedBox(height: 16),
           Text('Loading scan information...'),
         ],
@@ -823,7 +824,7 @@ class _ErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: NHSColors.red),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.red),
             const SizedBox(height: 16),
             Text(
               message,
@@ -855,7 +856,7 @@ class _EmptyWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox_outlined, size: 64, color: NHSColors.darkGrey),
+            Icon(Icons.inbox_outlined, size: 64, color: AppColors.darkGrey),
             SizedBox(height: 16),
             Text(
               'No scan information available',
@@ -912,8 +913,8 @@ class DetailScreen extends StatelessWidget {
                                   ? Icons.favorite
                                   : Icons.favorite_outline,
                               color: isFavourite
-                                  ? NHSColors.red
-                                  : NHSColors.darkGrey,
+                                  ? AppColors.red
+                                  : AppColors.darkGrey,
                               size: 28,
                             ),
                             onPressed: () =>
@@ -949,7 +950,7 @@ class DetailScreen extends StatelessWidget {
                     scan.shortSummary,
                     style: TextStyle(
                       fontSize: 18,
-                      color: NHSColors.darkGrey.withValues(alpha: 0.8),
+                      color: AppColors.darkGrey.withValues(alpha: 0.8),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -969,7 +970,7 @@ class DetailScreen extends StatelessWidget {
                   _InfoBlock(
                     title: 'Preparation',
                     icon: Icons.checklist,
-                    color: NHSColors.primary,
+                    color: AppColors.primary,
                     children: [
                       _InfoRow(
                         label: 'Fasting',
@@ -990,7 +991,7 @@ class DetailScreen extends StatelessWidget {
                             scan.preparation.instructions,
                             style: TextStyle(
                               fontSize: 14,
-                              color: NHSColors.darkGrey.withValues(alpha: 0.8),
+                              color: AppColors.darkGrey.withValues(alpha: 0.8),
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -1003,7 +1004,7 @@ class DetailScreen extends StatelessWidget {
                   _InfoBlock(
                     title: 'What to Expect',
                     icon: Icons.schedule,
-                    color: NHSColors.secondary,
+                    color: AppColors.secondary,
                     children: [
                       _InfoRow(
                         label: 'Duration',
@@ -1048,7 +1049,7 @@ class DetailScreen extends StatelessWidget {
                 placeholder: (context, url) => Container(
                   color: categoryColor.withValues(alpha: 0.3),
                   child: const Center(
-                    child: CircularProgressIndicator(color: NHSColors.white),
+                    child: CircularProgressIndicator(color: AppColors.white),
                   ),
                 ),
                 errorWidget: (context, url, error) => Container(
@@ -1056,7 +1057,7 @@ class DetailScreen extends StatelessWidget {
                   child: Icon(
                     Icons.medical_services,
                     size: 64,
-                    color: NHSColors.white.withValues(alpha: 0.7),
+                    color: AppColors.white.withValues(alpha: 0.7),
                   ),
                 ),
               )
@@ -1065,7 +1066,7 @@ class DetailScreen extends StatelessWidget {
                 child: Icon(
                   Icons.medical_services,
                   size: 64,
-                  color: NHSColors.white.withValues(alpha: 0.7),
+                  color: AppColors.white.withValues(alpha: 0.7),
                 ),
               ),
       ),
@@ -1123,7 +1124,7 @@ ${scan.safety.radiationNote.isNotEmpty ? '- ${scan.safety.radiationNote}' : ''}
 - Contrast Dye: ${scan.safety.contrastRisk ? 'May be required' : 'Not required'}
 - Pregnancy Safe: ${scan.safety.pregnancySafe ? 'Yes' : 'Consult your doctor'}
 
-Shared from SimpleMed Radiology App
+Shared from SimpleRad - Easy Scan Info
 ''';
 
     Share.share(
@@ -1199,7 +1200,7 @@ class SafetyInfoBox extends StatelessWidget {
                 safety.radiationNote,
                 style: TextStyle(
                   fontSize: 14,
-                  color: NHSColors.darkGrey.withValues(alpha: 0.8),
+                  color: AppColors.darkGrey.withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -1237,14 +1238,14 @@ class SafetyInfoBox extends StatelessWidget {
   Color _getRadiationColor(String level) {
     switch (level.toLowerCase()) {
       case 'green':
-        return NHSColors.green;
+        return AppColors.green;
       case 'amber':
       case 'orange':
-        return NHSColors.amber;
+        return AppColors.amber;
       case 'red':
-        return NHSColors.red;
+        return AppColors.red;
       default:
-        return NHSColors.green;
+        return AppColors.green;
     }
   }
 }
@@ -1260,17 +1261,17 @@ class _TrafficLight extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: NHSColors.darkGrey.withValues(alpha: 0.1),
+        color: AppColors.darkGrey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildLight(NHSColors.red, activeLevel.toLowerCase() == 'red'),
+          _buildLight(AppColors.red, activeLevel.toLowerCase() == 'red'),
           const SizedBox(height: 4),
-          _buildLight(NHSColors.amber, activeLevel.toLowerCase() == 'amber'),
+          _buildLight(AppColors.amber, activeLevel.toLowerCase() == 'amber'),
           const SizedBox(height: 4),
-          _buildLight(NHSColors.green, activeLevel.toLowerCase() == 'green'),
+          _buildLight(AppColors.green, activeLevel.toLowerCase() == 'green'),
         ],
       ),
     );
@@ -1311,7 +1312,7 @@ class _SafetyIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isRisk ? NHSColors.red : NHSColors.green;
+    final color = isRisk ? AppColors.red : AppColors.green;
     final statusText = isRisk ? 'Caution' : 'Safe';
 
     return Semantics(
@@ -1369,7 +1370,7 @@ class _InfoBlock extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: NHSColors.lightGrey,
+        color: AppColors.lightGrey,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -1418,14 +1419,14 @@ class _InfoRow extends StatelessWidget {
         child: Row(
           children: [
             Icon(icon,
-                size: 20, color: NHSColors.darkGrey.withValues(alpha: 0.6)),
+                size: 20, color: AppColors.darkGrey.withValues(alpha: 0.6)),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
                   fontSize: 14,
-                  color: NHSColors.darkGrey.withValues(alpha: 0.8),
+                  color: AppColors.darkGrey.withValues(alpha: 0.8),
                 ),
               ),
             ),
@@ -1460,5 +1461,5 @@ Color _parseColor(String hexString) {
   } catch (e) {
     // Return default color if parsing fails
   }
-  return NHSColors.primary;
+  return AppColors.primary;
 }
