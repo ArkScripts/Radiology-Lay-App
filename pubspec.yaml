@@ -1,0 +1,41 @@
+name: simplemed_radiology
+description: SimpleMed Radiology Info - NHS patient education app for radiology scans
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP client for fetching JSON from remote URL
+  # Similar to Java's HttpURLConnection or OkHttp
+  http: ^1.1.0
+
+  # Local storage for caching JSON data
+  # Similar to Java's SharedPreferences on Android
+  shared_preferences: ^2.2.2
+
+  # Image caching library - caches network images to disk
+  # Similar to Glide or Picasso in Android Java
+  cached_network_image: ^3.3.0
+
+  # State management using Provider pattern
+  # Similar to Android's ViewModel + LiveData pattern
+  provider: ^6.1.1
+
+  # Google Fonts for Lato typography
+  google_fonts: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/

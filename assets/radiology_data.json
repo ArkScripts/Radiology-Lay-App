@@ -1,0 +1,302 @@
+{
+  "meta": {
+    "version": "1.0",
+    "contact_email": "admin@simplemed.co.uk"
+  },
+  "sections": [
+    {
+      "category_name": "CT Scans",
+      "category_color_hex": "#005EB8",
+      "scans": [
+        {
+          "id": "ct_abdo",
+          "title": "CT Abdomen",
+          "short_summary": "A detailed 3D scan of your tummy organs.",
+          "full_description": "Computed Tomography (CT) uses X-rays to create detailed cross-sectional images of your abdomen. The scanner takes many pictures from different angles and a computer combines them to show your organs, blood vessels, and other structures. This scan helps doctors see your liver, spleen, kidneys, and intestines in great detail.",
+          "preparation": {
+            "fasting_hours": 4,
+            "bladder": "Empty",
+            "instructions": "Do not eat for 4 hours before your scan. Water is allowed. You may be asked to drink a special contrast liquid 1 hour before."
+          },
+          "logistics": {
+            "duration_minutes": "15",
+            "noise_level": "Low",
+            "claustrophobia_risk": "Low"
+          },
+          "safety": {
+            "radiation_level": "Amber",
+            "radiation_note": "This scan uses a moderate dose of radiation. The benefit of accurate diagnosis outweighs the small risk.",
+            "contrast_risk": true,
+            "pregnancy_safe": false
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/005EB8/FFFFFF/png?text=CT",
+            "hero_image_url": "https://placehold.co/600x400/005EB8/FFFFFF/png?text=CT+Abdomen",
+            "hero_aspect_ratio": 1.5
+          }
+        },
+        {
+          "id": "ct_chest",
+          "title": "CT Chest",
+          "short_summary": "A detailed look at your lungs and heart area.",
+          "full_description": "A CT chest scan creates detailed images of your lungs, heart, blood vessels, airways, and ribs. It's commonly used to investigate breathing problems, chest pain, or to check for infections and tumours. The scan is quick and painless.",
+          "preparation": {
+            "fasting_hours": 2,
+            "bladder": "N/A",
+            "instructions": "Avoid eating for 2 hours if contrast dye will be used. Wear loose, comfortable clothing without metal zips or buttons."
+          },
+          "logistics": {
+            "duration_minutes": "10",
+            "noise_level": "Low",
+            "claustrophobia_risk": "Low"
+          },
+          "safety": {
+            "radiation_level": "Amber",
+            "radiation_note": "Moderate radiation dose. Equivalent to about 2 years of natural background radiation.",
+            "contrast_risk": true,
+            "pregnancy_safe": false
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/005EB8/FFFFFF/png?text=CT",
+            "hero_image_url": "https://placehold.co/600x400/005EB8/FFFFFF/png?text=CT+Chest",
+            "hero_aspect_ratio": 1.5
+          }
+        },
+        {
+          "id": "ct_head",
+          "title": "CT Head",
+          "short_summary": "A quick scan to check your brain and skull.",
+          "full_description": "A CT head scan provides detailed images of your brain, skull, and blood vessels. It's often used in emergency situations to check for bleeding, stroke, or head injuries. The scan takes just a few minutes and requires no special preparation.",
+          "preparation": {
+            "fasting_hours": 0,
+            "bladder": "N/A",
+            "instructions": "No special preparation needed. Remove any metal objects from your head and neck area including earrings, hairpins, and glasses."
+          },
+          "logistics": {
+            "duration_minutes": "5",
+            "noise_level": "Low",
+            "claustrophobia_risk": "Low"
+          },
+          "safety": {
+            "radiation_level": "Amber",
+            "radiation_note": "Moderate radiation dose focused on the head area only.",
+            "contrast_risk": false,
+            "pregnancy_safe": false
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/005EB8/FFFFFF/png?text=CT",
+            "hero_image_url": "https://placehold.co/600x400/005EB8/FFFFFF/png?text=CT+Head",
+            "hero_aspect_ratio": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "category_name": "MRI Scans",
+      "category_color_hex": "#003087",
+      "scans": [
+        {
+          "id": "mri_brain",
+          "title": "MRI Brain",
+          "short_summary": "Detailed images of your brain without radiation.",
+          "full_description": "Magnetic Resonance Imaging (MRI) uses powerful magnets and radio waves to create very detailed pictures of your brain. Unlike CT, it doesn't use radiation. MRI is excellent for showing soft tissues and can detect conditions like multiple sclerosis, tumours, and stroke damage.",
+          "preparation": {
+            "fasting_hours": 0,
+            "bladder": "N/A",
+            "instructions": "Remove all metal objects including jewellery, watches, and hearing aids. You'll be asked about any metal implants or pacemakers. Wear comfortable clothing."
+          },
+          "logistics": {
+            "duration_minutes": "30",
+            "noise_level": "High",
+            "claustrophobia_risk": "High"
+          },
+          "safety": {
+            "radiation_level": "Green",
+            "radiation_note": "No radiation is used. MRI uses magnetic fields which are considered safe.",
+            "contrast_risk": true,
+            "pregnancy_safe": true
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/003087/FFFFFF/png?text=MRI",
+            "hero_image_url": "https://placehold.co/600x400/003087/FFFFFF/png?text=MRI+Brain",
+            "hero_aspect_ratio": 1.5
+          }
+        },
+        {
+          "id": "mri_spine",
+          "title": "MRI Spine",
+          "short_summary": "A clear view of your backbone and spinal cord.",
+          "full_description": "An MRI of the spine creates detailed images of your vertebrae, spinal cord, nerves, and the discs between your bones. It's excellent for finding the cause of back pain, identifying slipped discs, nerve compression, or spinal cord problems.",
+          "preparation": {
+            "fasting_hours": 0,
+            "bladder": "N/A",
+            "instructions": "Wear loose, comfortable clothing. Remove all metal objects. Let staff know if you have any implants, tattoos, or if you're pregnant."
+          },
+          "logistics": {
+            "duration_minutes": "45",
+            "noise_level": "High",
+            "claustrophobia_risk": "High"
+          },
+          "safety": {
+            "radiation_level": "Green",
+            "radiation_note": "No radiation exposure. Safe for repeated scans if needed.",
+            "contrast_risk": true,
+            "pregnancy_safe": true
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/003087/FFFFFF/png?text=MRI",
+            "hero_image_url": "https://placehold.co/600x400/003087/FFFFFF/png?text=MRI+Spine",
+            "hero_aspect_ratio": 1.5
+          }
+        },
+        {
+          "id": "mri_knee",
+          "title": "MRI Knee",
+          "short_summary": "Detailed look at your knee joint and ligaments.",
+          "full_description": "An MRI of the knee shows the bones, cartilage, tendons, ligaments, and muscles around your knee joint. It's very useful for diagnosing sports injuries, arthritis, and meniscus tears. You'll lie still with your knee inside the scanner.",
+          "preparation": {
+            "fasting_hours": 0,
+            "bladder": "N/A",
+            "instructions": "Wear shorts or loose trousers. Remove any metal objects. You may keep your clothes on if they have no metal parts."
+          },
+          "logistics": {
+            "duration_minutes": "30",
+            "noise_level": "High",
+            "claustrophobia_risk": "Moderate"
+          },
+          "safety": {
+            "radiation_level": "Green",
+            "radiation_note": "Completely safe with no radiation. The magnetic field poses no known health risks.",
+            "contrast_risk": false,
+            "pregnancy_safe": true
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/003087/FFFFFF/png?text=MRI",
+            "hero_image_url": "https://placehold.co/600x400/003087/FFFFFF/png?text=MRI+Knee",
+            "hero_aspect_ratio": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "category_name": "Ultrasound",
+      "category_color_hex": "#00703C",
+      "scans": [
+        {
+          "id": "us_abdo",
+          "title": "Ultrasound Abdomen",
+          "short_summary": "A gentle scan using sound waves to see your organs.",
+          "full_description": "Ultrasound uses high-frequency sound waves to create images of your internal organs. It's the same technology used to see babies during pregnancy. For abdominal scans, we can see your liver, gallbladder, kidneys, and other organs. It's completely painless and uses no radiation.",
+          "preparation": {
+            "fasting_hours": 6,
+            "bladder": "Full",
+            "instructions": "Do not eat or drink for 6 hours before your scan. This helps us see your gallbladder clearly. Drink 1 litre of water 1 hour before and do not empty your bladder."
+          },
+          "logistics": {
+            "duration_minutes": "20",
+            "noise_level": "Low",
+            "claustrophobia_risk": "Low"
+          },
+          "safety": {
+            "radiation_level": "Green",
+            "radiation_note": "No radiation at all. Ultrasound uses safe sound waves and can be repeated as often as needed.",
+            "contrast_risk": false,
+            "pregnancy_safe": true
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/00703C/FFFFFF/png?text=US",
+            "hero_image_url": "https://placehold.co/600x400/00703C/FFFFFF/png?text=Ultrasound",
+            "hero_aspect_ratio": 1.5
+          }
+        },
+        {
+          "id": "us_thyroid",
+          "title": "Ultrasound Thyroid",
+          "short_summary": "A quick look at the gland in your neck.",
+          "full_description": "This scan examines your thyroid gland, located at the front of your neck. It can detect nodules, cysts, or changes in the gland's size. The sonographer will apply gel to your neck and move a small probe to capture images.",
+          "preparation": {
+            "fasting_hours": 0,
+            "bladder": "N/A",
+            "instructions": "No preparation needed. Wear a top with a loose or open neck. Remove necklaces before your appointment."
+          },
+          "logistics": {
+            "duration_minutes": "15",
+            "noise_level": "Low",
+            "claustrophobia_risk": "Low"
+          },
+          "safety": {
+            "radiation_level": "Green",
+            "radiation_note": "Completely safe. Sound waves pose no health risks.",
+            "contrast_risk": false,
+            "pregnancy_safe": true
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/00703C/FFFFFF/png?text=US",
+            "hero_image_url": "https://placehold.co/600x400/00703C/FFFFFF/png?text=Thyroid+US",
+            "hero_aspect_ratio": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "category_name": "X-Rays",
+      "category_color_hex": "#425563",
+      "scans": [
+        {
+          "id": "xr_chest",
+          "title": "Chest X-Ray",
+          "short_summary": "A quick picture of your lungs and heart.",
+          "full_description": "A chest X-ray is one of the most common imaging tests. It creates a picture of your heart, lungs, blood vessels, airways, and the bones of your chest and spine. It's very quick - taking just seconds - and helps diagnose conditions like pneumonia, heart problems, and lung disease.",
+          "preparation": {
+            "fasting_hours": 0,
+            "bladder": "N/A",
+            "instructions": "Remove jewellery and clothing with metal from your chest area. You may be given a gown to wear. Tell staff if you might be pregnant."
+          },
+          "logistics": {
+            "duration_minutes": "5",
+            "noise_level": "Low",
+            "claustrophobia_risk": "Low"
+          },
+          "safety": {
+            "radiation_level": "Green",
+            "radiation_note": "Very low radiation dose - equivalent to about 3 days of natural background radiation.",
+            "contrast_risk": false,
+            "pregnancy_safe": false
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/425563/FFFFFF/png?text=XR",
+            "hero_image_url": "https://placehold.co/600x400/425563/FFFFFF/png?text=Chest+X-Ray",
+            "hero_aspect_ratio": 1.5
+          }
+        },
+        {
+          "id": "xr_hand",
+          "title": "Hand X-Ray",
+          "short_summary": "Images of the bones in your hand and wrist.",
+          "full_description": "A hand X-ray creates images of the small bones in your fingers, hand, and wrist. It's commonly used to check for fractures, arthritis, or bone abnormalities. The process is very quick and you simply place your hand flat on the X-ray plate.",
+          "preparation": {
+            "fasting_hours": 0,
+            "bladder": "N/A",
+            "instructions": "Remove rings and watches from the hand being X-rayed. No other preparation is needed."
+          },
+          "logistics": {
+            "duration_minutes": "5",
+            "noise_level": "Low",
+            "claustrophobia_risk": "Low"
+          },
+          "safety": {
+            "radiation_level": "Green",
+            "radiation_note": "Minimal radiation - less than 1 day of natural background radiation.",
+            "contrast_risk": false,
+            "pregnancy_safe": true
+          },
+          "media": {
+            "icon_url": "https://placehold.co/100x100/425563/FFFFFF/png?text=XR",
+            "hero_image_url": "https://placehold.co/600x400/425563/FFFFFF/png?text=Hand+X-Ray",
+            "hero_aspect_ratio": 1.5
+          }
+        }
+      ]
+    }
+  ]
+}

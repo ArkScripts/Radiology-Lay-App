@@ -1,0 +1,16 @@
+# Flutter linting rules
+# This is similar to Android's lint.xml or Java's Checkstyle configuration
+
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Encourage good practices
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    avoid_print: false  # Allow print for debugging
+
+    # Documentation
+    public_member_api_docs: false  # Don't require docs for all public members
